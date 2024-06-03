@@ -38,10 +38,10 @@ def generar_trayectoria(a_x, a_y, t):
     yd = a_y[0] + a_y[1]*t + a_y[2]*t**2 + a_y[3]*t**3 + a_y[4]*t**4 + a_y[5]*t**5
     return xd, yd
 #Sección 6
-def plot_trajectoria(t, xd, yd):
+def plot_trajectoria(t, xd, yd,q1d, q2d):
     plt.figure(figsize=(12, 6))
     #
-    plt.subplot(1, 2, 1)
+    plt.subplot(2, 2, 1)
     plt.plot(t, xd, label='Trayectoria en x')
     plt.xlabel('Tiempo [s]')
     plt.ylabel('Posición en x [m]')
@@ -49,7 +49,7 @@ def plot_trajectoria(t, xd, yd):
     plt.legend()
     plt.grid(True)
     #
-    plt.subplot(1, 2, 2)
+    plt.subplot(2, 2, 2)
     plt.plot(t, yd, label='Trayectoria en y')
     plt.xlabel('Tiempo [s]')
     plt.ylabel('Posición en y [m]')
@@ -57,16 +57,56 @@ def plot_trajectoria(t, xd, yd):
     plt.legend()
     plt.grid(True)
     #
+    plt.subplot(2, 2, 3)
+    plt.plot(t, q1d, label='Ángulo q1')
+    plt.xlabel('Tiempo [s]')
+    plt.ylabel('Ángulo q1 [grados]')
+    plt.title('Trayectoria Articular q1')
+    plt.legend()
+    plt.grid(True)
+
+    plt.subplot(2, 2, 4)
+    plt.plot(t, q2d, label='Ángulo q2')
+    plt.xlabel('Tiempo [s]')
+    plt.ylabel('Ángulo q2 [grados]')
+    plt.title('Trayectoria Articular q2')
+    plt.legend()
+    plt.grid(True)
+    #
     plt.tight_layout()
     plt.show()
 #Sección 7
+def inverse_kinematics(x_d, y_d):
+    # Calculando cos(theta2) y sin(theta2)
+    cos_theta2 = (x_d**2 + y_d**2 - l1**2 - l2**2) / (2 * l1 * l2)
+    sin_theta2 = np.sqrt(1 - cos_theta2**2)  # Utilizamos la relación trigonométrica sin^2 + cos^2 = 1
+
+    # Calculando theta2
+    theta2 = np.arctan2(sin_theta2, cos_theta2)
+
+    # Calculando theta1
+    k1 = l1 + l2 * cos_theta2
+    k2 = l2 * sin_theta2
+    theta1 = np.arctan2(y_d, x_d) - np.arctan2(k2, k1)
+
+    return np.degrees(theta1), np.degrees(theta2)
+#
 def main():
     xf, yf = get_user_input()
-    print("Posición deseada en x:", xf)
-    print("Posición deseada en y:", yf)
     t = np.arange(ti, tf, T)
     a_x, a_y = calcular_coeficientes(xi, yi, xf, yf, ti, tf)
     xd, yd = generar_trayectoria(a_x, a_y, t)
-    plot_trajectoria(t, xd, yd)
+    # Convertir xd y yd de metros a centímetros
+    xd_cm = xd * 100
+    yd_cm = yd * 100
+
+    # Calcular las trayectorias articulares
+    q1d = np.zeros_like(t)
+    q2d = np.zeros_like(t)
+    for i in range(len(t)):
+        q1d[i], q2d[i] = inverse_kinematics(xd[i], yd[i])
+
+    plot_trajectoria(t, xd_cm, yd_cm, q1d, q2d)
 #sección 8
+
 main()
