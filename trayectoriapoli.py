@@ -76,21 +76,18 @@ def plot_trajectoria(t, xd, yd,q1d, q2d):
     plt.tight_layout()
     plt.show()
 #Sección 7
-def inverse_kinematics(x_d, y_d):
-    # Calculando cos(theta2) y sin(theta2)
-    cos_theta2 = (x_d**2 + y_d**2 - l1**2 - l2**2) / (2 * l1 * l2)
-    sin_theta2 = np.sqrt(1 - cos_theta2**2)  # Utilizamos la relación trigonométrica sin^2 + cos^2 = 1
+def cinematica_inversa(x_d, y_d):
+    cos_teta2 = (x_d**2 + y_d**2 - l1**2 - l2**2) / (2 * l1 * l2)
+    sin_teta2 = np.sqrt(1 - cos_teta2**2)  
 
-    # Calculando theta2
-    theta2 = np.arctan2(sin_theta2, cos_theta2)
+    teta2 = np.arctan2(sin_teta2, cos_teta2)
+    #Teta1
+    k1 = l1 + l2 * cos_teta2
+    k2 = l2 * sin_teta2
+    teta1 = np.arctan2(y_d, x_d) - np.arctan2(k2, k1)
 
-    # Calculando theta1
-    k1 = l1 + l2 * cos_theta2
-    k2 = l2 * sin_theta2
-    theta1 = np.arctan2(y_d, x_d) - np.arctan2(k2, k1)
-
-    return np.degrees(theta1), np.degrees(theta2)
-#
+    return np.degrees(teta1), np.degrees(teta2)
+#Sección 8
 def main():
     xf, yf = get_user_input()
     t = np.arange(ti, tf, T)
@@ -104,9 +101,8 @@ def main():
     q1d = np.zeros_like(t)
     q2d = np.zeros_like(t)
     for i in range(len(t)):
-        q1d[i], q2d[i] = inverse_kinematics(xd[i], yd[i])
+        q1d[i], q2d[i] = cinematica_inversa(xd[i], yd[i])
 
     plot_trajectoria(t, xd_cm, yd_cm, q1d, q2d)
-#sección 8
-
+#sección 9
 main()
