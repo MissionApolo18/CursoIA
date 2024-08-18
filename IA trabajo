@@ -1,0 +1,97 @@
+import logging
+logging. basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
+
+class CNF: 
+    def __init__(self,clauses):
+        self.clauses = clauses
+        self.assignment = []
+        
+    def emptySentence(self):
+        return not self.clauses
+    
+    def isEmpty(self):
+        return any(len(clause) == 0 for clause in self.clauses)
+
+
+class DPLL:
+    """
+    DPLL algorithm
+    """
+    
+    @staticmethod
+    def satisfiable(phi):
+        """
+        determines if phi is satisfiable
+        :param phi: a CNF formula
+        :returs: una tupla cuyo primer elemento indica
+        si la fórmula es satisfactible o no, y el segundo
+        la asignación que logró hacer la fórmula verdadera
+        """
+        log.info("phi: "+str(phi.clauses))
+        if phi.emptySentence():
+            log.info("sentencia vacia")
+            return (True,phi.assignment)
+        return DPLL.dpll(phi)
+        
+        #inserta tu código aquí
+    def dpll(phi):
+        log.info(str(phi.clauses)+str(phi.assignment))
+        if phi.emptySentence():
+            log.info ("Sentencia vacia")
+            return (True, phi.assignment)
+        
+        if phi.isEmpty():
+            log.info("clausula vacia")
+            return (False, None)
+        l = DPLL.select_literal(phi.clauses)
+        log.info("Literal seleccionado: "+str(l))
+
+        new_phi = CNF(DPLL.simplify(phi.clauses,l))
+        new_phi.assignment = phi.assignment + [l]
+        sat, new_assignment = DPLL.dpll(new_phi)
+        if sat:
+            return (True,new_assignment)
+
+        new_phi = CNF(DPLL.simplify(phi.clauses, -l))
+        new_phi.assignment = phi.assignment + [-l]
+        sat, new_assignment = DPLL.dpll(new_phi)
+        if sat:
+            return (True, new_assignment)
+
+        return (False, None)
+    
+    def select_literal(clauses):
+        for clause in clauses:
+            for literal in clause:
+                return literal
+    
+    def simplify(clauses, literal):
+        new_clauses =[]
+        for clause in clauses:
+            if literal in clause:
+                continue
+            new_clause = [x for x in clause if x != -literal]
+            new_clauses.append(new_clause)
+        return new_clauses
+    
+    def parse_formula(formula):
+        clauses = formula.split('&')
+        cnf_clauses = []
+        for clause in clauses:
+            clause = clause.strip().replace('(', '').replace(')', '')
+            literals = clause.split('|')
+            cnf_clause = []
+            for literal in literals:
+                literal = literal.strip()
+                if literal.startswith('~'):
+                    cnf_clause.append(-int(literal[2:]))
+                else:
+                    cnf_clause.append(int(literal[1:]))
+            cnf_clauses.append(cnf_clause)
+        return CNF(cnf_clauses)
+
+
+cnf_prueba = DPLL.parse_formula ("(~x1 | x3 | x4) & (~x2 | x6 | x4) & (~x2 | ~x6 | ~x3) & (~x4 | ~x2) & (x2 | ~x3 | ~x1) & (x2 | x6 | x3) & (x2 | ~x6 | ~x4) & (x1 | x5) & (x1 | x6) & (~x6 | x3 | ~x5) & (x1 | ~x3 | ~x5)")
+resultado = DPLL.satisfiable(cnf_prueba)
+print(resultado)

@@ -70,7 +70,7 @@ def generar_trayectoria(a_x, a_y, t):
     return xd, yd
 #Sección 6
 def plot_trajectoria(t, xd, yd, q1d, q2d, tau_1, tau_2):
-    """Graficar las trayectorias polinomiales en x, y y las trayectorias articulares."""
+    """Grafica las trayectorias polinomiales en x, y y las trayectorias articulares."""
     plt.figure(figsize=(12, 12))
 
     plt.subplot(3, 2, 1)

@@ -1,0 +1,35 @@
+import numpy as np
+
+# Define la matriz de probabilidad T basada en el grafo de la imagen
+T = np.array([
+    [0, 0.2, 0.2, 0.7],  # Transiciones hacia 'a'
+    [0.4, 0, 0.4, 0.1],  # Transiciones hacia 'b'
+    [0.2, 0.2, 0, 0.2],  # Transiciones hacia 'c'
+    [0.4, 0.6, 0.4, 0]   # Transiciones hacia 'd'
+])
+
+# Define un estado inicial, por ejemplo que el agente se encuentra en 'b'
+x = np.array([0, 1, 0, 0])
+
+# Función para iterar la ecuación
+def calcula_dist(T, x, iteraciones):
+    for _ in range(iteraciones):
+        x = np.dot(T.T, x)
+    return x
+
+# ¿Qué pasa al iterar 50 veces la ecuación?
+x_50 = calcula_dist(T, x, 50)
+print("Distribución después de 50 iteraciones:", x_50)
+
+# Calcula eigenvectores
+l, v = np.linalg.eig(T)
+print("Valores propios:", l)
+print("Vectores propios:\n", v)
+
+# Identifica la columna correspondiente para el eigenvalor 1
+columna = np.where(np.isclose(l, 1))[0][0]
+
+# Normaliza para obtener la distribución
+x_s = np.real(v[:, columna])
+x_s = x_s / np.sum(x_s)
+print(x_s)
